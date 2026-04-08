@@ -127,11 +127,35 @@ public class ArcaneWandPlugin extends JavaPlugin implements Listener {
         // Cancel the original hit — no armor/enchant reduction
         event.setCancelled(true);
 
+        // ---- KNOCKBACK ----
+        // Push victim 7 blocks away from the attacker, horizontally
+        Vector knockback = victim.getLocation().toVector()
+            .subtract(attacker.getLocation().toVector())
+            .setY(0)        // keep it horizontal
+            .normalize()
+            .multiply(1.8)  // 1.8 gives ~7 block launch distance
+            .setY(0.4);     // small upward arc so it looks natural
+        victim.setVelocity(knockback);
+
         double newHp = victim.getHealth() - HIT_DAMAGE;
 
         if (newHp <= 0) {
+            // Store kill location before health is set to 0
+            Location killLoc = victim.getLocation().clone().add(0, 1, 0);
+            World killWorld  = victim.getWorld();
+
             // Kill the entity
             victim.setHealth(0);
+
+            // ---- KILL EFFECT ----
+            // Small shockwave of particles at the death location
+            killWorld.spawnParticle(Particle.EXPLOSION,    killLoc, 1, 0, 0, 0, 0);
+            killWorld.spawnParticle(Particle.CRIT,         killLoc, 30, 0.4, 0.4, 0.4, 0.6);
+            killWorld.spawnParticle(Particle.LARGE_SMOKE,  killLoc, 20, 0.3, 0.3, 0.3, 0.05);
+            killWorld.spawnParticle(Particle.FLAME,        killLoc, 15, 0.3, 0.3, 0.3, 0.08);
+            killWorld.playSound(killLoc, Sound.ENTITY_GENERIC_EXPLODE, 0.6f, 1.4f);
+            killWorld.playSound(killLoc, Sound.ENTITY_PLAYER_DEATH,    1f,   1f);
+
             if (victim instanceof Player vPlayer) {
                 attacker.sendMessage(ChatColor.DARK_RED + "⚔ KILL! " +
                     ChatColor.GRAY + vPlayer.getName() + " eliminated.");
@@ -364,4 +388,3 @@ public class ArcaneWandPlugin extends JavaPlugin implements Listener {
         return Character.toUpperCase(raw.charAt(0)) + raw.substring(1);
     }
 }
-

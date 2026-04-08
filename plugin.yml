@@ -1,0 +1,17 @@
+name: ArcaneWand
+version: 1.0
+main: com.arcanewand.ArcaneWandPlugin
+api-version: 1.21
+author: YourName
+description: A wand with 2-shot true damage and blink teleport.
+
+commands:
+  givewand:
+    description: Give the Arcane Wand to a player.
+    usage: /givewand [player]
+    permission: arcanewand.give
+
+permissions:
+  arcanewand.give:
+    description: Allows giving the Arcane Wand.
+    default: op
